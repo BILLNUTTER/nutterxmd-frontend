@@ -45,59 +45,6 @@
 - MongoDB Atlas account
 - Git
 
-### Backend Setup
-
-1. Navigate to backend directory:
-```bash
-cd backend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create `.env` file:
-```bash
-cp .env.example .env
-```
-
-4. Update `.env` with your MongoDB Atlas URL:
-```
-PORT=5000
-JWT_SECRET=your-super-secret-jwt-key
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/nutterxmd
-ADMIN_PHONE=0758891491
-NODE_ENV=development
-```
-
-5. Start backend server:
-```bash
-npm run dev
-```
-
-### Frontend Setup
-
-1. Install frontend dependencies:
-```bash
-npm install
-```
-
-2. Create `.env` file:
-```bash
-cp .env.example .env
-```
-
-3. Update `.env`:
-```
-VITE_API_URL=http://localhost:5000/api
-```
-
-4. Start frontend development server:
-```bash
-npm run dev
-```
-
 ## 🎯 Usage Guide
 
 ### User Journey
@@ -112,7 +59,6 @@ npm run dev
 9. **Configure Features** - Toggle bot features from dashboard
 
 ### Admin Panel
-- Access via `/admin` with admin key: `nutterxmd-admin-2024`
 - View pending payments and verify M-Pesa confirmations
 - Monitor active bot sessions
 - Activate bots for 30-day periods
@@ -127,19 +73,6 @@ npm run dev
 - 💰 **Payment Reminders** - 30-day renewal notifications
 - ⌨️ **Custom Commands** - Define custom bot responses
 
-## 🔧 Configuration
-
-### MongoDB Collections
-- `users` - User accounts and authentication
-- `sessions` - WhatsApp session management
-- `payments` - Payment tracking and verification
-- `usersettings` - Bot feature configurations
-
-### Environment Variables
-- `MONGO_URI` - MongoDB connection string
-- `JWT_SECRET` - JWT signing secret
-- `ADMIN_PHONE` - M-Pesa payment number
-- `PORT` - Backend server port
 
 ## 👨‍💻 Developer Contact
 
@@ -152,6 +85,5 @@ npm run dev
 
 This project is proprietary software. All rights reserved.
 
----
 
 **⚡ NutterXMD - Powering WhatsApp Automation Since 2024**
