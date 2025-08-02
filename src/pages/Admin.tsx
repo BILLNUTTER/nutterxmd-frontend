@@ -92,35 +92,40 @@ const Admin: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const paymentsResponse = await fetch('/api/admin/payments/pending', {
-        headers: { 'admin-key': adminKey }
-      });
+      const [paymentsResponse, sessionsResponse, usersResponse] = await Promise.all([
+        fetch('/api/admin/payments/pending', { headers: { 'admin-key': adminKey } }),
+        fetch('/api/admin/sessions/active', { headers: { 'admin-key': adminKey } }),
+        fetch('/api/admin/users', { headers: { 'admin-key': adminKey } }),
+      ]);
+
       if (paymentsResponse.ok) {
         const paymentsData = await paymentsResponse.json();
         setPayments(paymentsData);
+      } else {
+        console.warn('❌ Payments fetch failed:', paymentsResponse.status);
       }
 
-      const sessionsResponse = await fetch('/api/admin/sessions/active', {
-        headers: { 'admin-key': adminKey }
-      });
       if (sessionsResponse.ok) {
         const sessionsData = await sessionsResponse.json();
         setSessions(sessionsData);
+      } else {
+        console.warn('❌ Sessions fetch failed:', sessionsResponse.status);
       }
 
-      const usersResponse = await fetch('/api/admin/users', {
-        headers: { 'admin-key': adminKey }
-      });
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         setUsers(usersData);
+      } else {
+        console.warn('❌ Users fetch failed:', usersResponse.status);
       }
+
     } catch (error) {
-      console.error('Failed to load admin data:', error);
+      console.error('❌ Failed to load admin data:', error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const verifyPayment = async (paymentId: string) => {
     try {
