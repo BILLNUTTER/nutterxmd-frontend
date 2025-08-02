@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Shield, Users, CreditCard, CheckCircle, X, 
-   Smartphone, Settings, Eye, 
-  Send, Link, Bot, Sparkles 
+import {
+  Shield, Users, CreditCard, CheckCircle, X,
+  Smartphone, Settings, Eye,
+  Send, Link, Bot, Sparkles
 } from 'lucide-react';
 import InteractiveBackground from '../components/InteractiveBackground';
 import GlassCard from '../components/GlassCard';
@@ -65,144 +65,145 @@ const Admin: React.FC = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
 
-  
-const handleAdminLogin = async () => {
-  try {
-    const response = await fetch('http://localhost:5000/api/admin/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ adminKey }), // ✅ Required
-    });
 
-    if (response.ok) {
-      setIsAuthenticated(true);
-      await loadData();
-    } else {
-      alert('Invalid admin key');
+  const handleAdminLogin = async () => {
+    try {
+      const response = await fetch('https://nutterxmd-b92d0e5705d8.herokuapp.com/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ adminKey }),
+      });
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+        await loadData();
+      } else {
+        alert('Invalid admin key');
+      }
+    } catch (err) {
+      alert('Error connecting to server');
+      console.error(err);
     }
-  } catch (err) {
-    alert('Error connecting to server');
-    console.error(err);
-  }
-};
+  };
 
-const loadData = async () => {
-  setLoading(true);
-  try {
-    const paymentsResponse = await fetch('/api/admin/payments/pending', {
-      headers: { 'admin-key': adminKey }
-    });
-    if (paymentsResponse.ok) {
-      const paymentsData = await paymentsResponse.json();
-      setPayments(paymentsData);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const paymentsResponse = await fetch('/api/admin/payments/pending', {
+        headers: { 'admin-key': adminKey }
+      });
+      if (paymentsResponse.ok) {
+        const paymentsData = await paymentsResponse.json();
+        setPayments(paymentsData);
+      }
+
+      const sessionsResponse = await fetch('/api/admin/sessions/active', {
+        headers: { 'admin-key': adminKey }
+      });
+      if (sessionsResponse.ok) {
+        const sessionsData = await sessionsResponse.json();
+        setSessions(sessionsData);
+      }
+
+      const usersResponse = await fetch('/api/admin/users', {
+        headers: { 'admin-key': adminKey }
+      });
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        setUsers(usersData);
+      }
+    } catch (error) {
+      console.error('Failed to load admin data:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const sessionsResponse = await fetch('/api/admin/sessions/active', {
-      headers: { 'admin-key': adminKey }
-    });
-    if (sessionsResponse.ok) {
-      const sessionsData = await sessionsResponse.json();
-      setSessions(sessionsData);
-    }
+  const verifyPayment = async (paymentId: string) => {
+    try {
+      const response = await fetch('/api/admin/payments/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-key': adminKey
+        },
+        body: JSON.stringify({ paymentId, adminId: 'admin' })
+      });
 
-    const usersResponse = await fetch('/api/admin/users', {
-      headers: { 'admin-key': adminKey }
-    });
-    if (usersResponse.ok) {
-      const usersData = await usersResponse.json();
-      setUsers(usersData);
-    }
-  } catch (error) {
-    console.error('Failed to load admin data:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const verifyPayment = async (paymentId: string) => {
-  try {
-    const response = await fetch('/api/admin/payments/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'admin-key': adminKey
-      },
-      body: JSON.stringify({ paymentId, adminId: 'admin' })
-    });
-
-    if (response.ok) {
-      alert('Payment verified and bot activated!');
-      await loadData();
-    } else {
+      if (response.ok) {
+        alert('Payment verified and bot activated!');
+        await loadData();
+      } else {
+        alert('Failed to verify payment');
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
       alert('Failed to verify payment');
     }
-  } catch (error) {
-    console.error('Payment verification error:', error);
-    alert('Failed to verify payment');
-  }
-};
+  };
 
-const sendMessage = async () => {
-  if (!selectedUser || !message.trim()) return;
+  const sendMessage = async () => {
+    if (!selectedUser || !message.trim()) return;
 
-  try {
-    const response = await fetch('/api/admin/send-message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'admin-key': adminKey
-      },
-      body: JSON.stringify({ userId: selectedUser._id, message })
-    });
+    try {
+      const response = await fetch('/api/admin/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-key': adminKey
+        },
+        body: JSON.stringify({ userId: selectedUser._id, message })
+      });
 
-    if (response.ok) {
-      alert('Message sent successfully!');
-      setMessage('');
-      setShowMessageModal(false);
-      setSelectedUser(null);
-    } else {
+      if (response.ok) {
+        alert('Message sent successfully!');
+        setMessage('');
+        setShowMessageModal(false);
+        setSelectedUser(null);
+      } else {
+        alert('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Send message error:', error);
       alert('Failed to send message');
     }
-  } catch (error) {
-    console.error('Send message error:', error);
-    alert('Failed to send message');
-  }
-};
+  };
 
-const linkDevice = async () => {
-  if (!selectedUser) return;
+  const linkDevice = async () => {
+    if (!selectedUser) return;
 
-  try {
-    const response = await fetch('/api/admin/link-device', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'admin-key': adminKey
-      },
-      body: JSON.stringify({ userId: selectedUser._id })
-    });
+    try {
+      const response = await fetch('/api/admin/link-device', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-key': adminKey
+        },
+        body: JSON.stringify({ userId: selectedUser._id })
+      });
 
-    if (response.ok) {
-      alert('Device linking initiated successfully!');
-      setShowLinkModal(false);
-      setSelectedUser(null);
-      await loadData();
-    } else {
+      if (response.ok) {
+        alert('Device linking initiated successfully!');
+        setShowLinkModal(false);
+        setSelectedUser(null);
+        await loadData();
+      } else {
+        alert('Failed to link device');
+      }
+    } catch (error) {
+      console.error('Link device error:', error);
       alert('Failed to link device');
     }
-  } catch (error) {
-    console.error('Link device error:', error);
-    alert('Failed to link device');
-  }
-};
+  };
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <InteractiveBackground />
-        
+
         <GlassCard className="w-full max-w-md p-8 animate-fade-in-up">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -274,7 +275,7 @@ const linkDevice = async () => {
             </button>
           </div>
         </GlassCard>
-        
+
         <Footer />
       </div>
     );
@@ -283,7 +284,7 @@ const linkDevice = async () => {
   return (
     <div className="min-h-screen p-4">
       <InteractiveBackground />
-      
+
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -329,7 +330,7 @@ const linkDevice = async () => {
                   </p>
                 </div>
               </div>
-              
+
               <button
                 onClick={() => {
                   setIsAuthenticated(false);
@@ -354,12 +355,11 @@ const linkDevice = async () => {
               ].map((tab) => (
                 <button
                   key={tab.key}
-               onClick={() => setActiveTab(tab.key as 'payments' | 'sessions' | 'users')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                    activeTab === tab.key
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-300 hover:bg-white/10'
-                  }`}
+                  onClick={() => setActiveTab(tab.key as 'payments' | 'sessions' | 'users')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${activeTab === tab.key
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-300 hover:bg-white/10'
+                    }`}
                 >
                   {tab.icon}
                   <span>{tab.label}</span>
@@ -382,7 +382,7 @@ const linkDevice = async () => {
                   <CreditCard className="w-6 h-6 text-green-400" />
                   Pending Payments ({payments.length})
                 </h2>
-                
+
                 {payments.length === 0 ? (
                   <p className="text-gray-400 text-center py-8">No pending payments</p>
                 ) : (
@@ -400,7 +400,7 @@ const linkDevice = async () => {
                               {new Date(payment.createdAt).toLocaleString()}
                             </p>
                           </div>
-                          
+
                           <button
                             onClick={() => verifyPayment(payment._id)}
                             className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2"
@@ -423,7 +423,7 @@ const linkDevice = async () => {
                   <Users className="w-6 h-6 text-blue-400" />
                   Active Sessions ({sessions.length})
                 </h2>
-                
+
                 {sessions.length === 0 ? (
                   <p className="text-gray-400 text-center py-8">No active sessions</p>
                 ) : (
@@ -441,7 +441,7 @@ const linkDevice = async () => {
                               Expires: {new Date(session.expiryDate).toLocaleString()}
                             </p>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                             <span className="text-green-400 text-sm">Active</span>
@@ -461,7 +461,7 @@ const linkDevice = async () => {
                   <Settings className="w-6 h-6 text-purple-400" />
                   All Users ({users.length})
                 </h2>
-                
+
                 {users.length === 0 ? (
                   <p className="text-gray-400 text-center py-8">No users found</p>
                 ) : (
@@ -490,7 +490,7 @@ const linkDevice = async () => {
                               Joined: {new Date(user.createdAt).toLocaleDateString()}
                             </p>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => {
@@ -502,7 +502,7 @@ const linkDevice = async () => {
                             >
                               <Send className="w-4 h-4" />
                             </button>
-                            
+
                             <button
                               onClick={() => {
                                 setSelectedUser(user);
@@ -513,7 +513,7 @@ const linkDevice = async () => {
                             >
                               <Link className="w-4 h-4" />
                             </button>
-                            
+
                             <button
                               className="p-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg text-purple-400 transition-colors duration-300"
                               title="View Details"
@@ -548,13 +548,13 @@ const linkDevice = async () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <p className="text-gray-300 text-sm mb-2">To: {selectedUser.username}</p>
                   <p className="text-gray-400 text-xs">{selectedUser.phone}</p>
                 </div>
-                
+
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -562,7 +562,7 @@ const linkDevice = async () => {
                   rows={4}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
-                
+
                 <div className="flex space-x-3">
                   <button
                     onClick={sendMessage}
@@ -603,19 +603,19 @@ const linkDevice = async () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <p className="text-gray-300 text-sm mb-2">User: {selectedUser.username}</p>
                   <p className="text-gray-400 text-xs">{selectedUser.phone}</p>
                 </div>
-                
+
                 <div className="p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
                   <p className="text-yellow-300 text-sm">
                     This will initiate device linking for the user. They will receive instructions to link their WhatsApp.
                   </p>
                 </div>
-                
+
                 <div className="flex space-x-3">
                   <button
                     onClick={linkDevice}
@@ -639,7 +639,7 @@ const linkDevice = async () => {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </div>
   );
